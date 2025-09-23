@@ -4,7 +4,7 @@
 # =============================================================================
 # Base Stage: Common dependencies and setup
 # =============================================================================
-FROM python:3.11-slim as base
+FROM python:3.11-slim AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -33,7 +33,7 @@ RUN pip install --no-cache-dir \
 # =============================================================================
 # Development Stage: Hot reload, debugging tools
 # =============================================================================
-FROM base as development
+FROM base AS development
 
 # Install development dependencies
 RUN pip install --no-cache-dir \
@@ -60,7 +60,7 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload
 # =============================================================================
 # Production Stage: Optimized, secure, minimal
 # =============================================================================
-FROM base as production
+FROM base AS production
 
 # Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser

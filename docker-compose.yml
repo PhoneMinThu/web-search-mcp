@@ -30,11 +30,27 @@ services:
     profiles:
       - dev
       - prod
-    # Development-specific configuration
+    # Development-specific configuration  
     volumes:
-      - .:/app:cached # Live code reload
       - pip_cache:/root/.cache/pip # Faster rebuilds
     depends_on: []
+    develop:
+      watch:
+        # Sync Python source files and restart container
+        - action: sync+restart
+          path: ./app
+          target: /app/app
+          ignore:
+            - __pycache__/
+            - "*.pyc"
+            - "*.pyo"
+        # Sync config files and restart
+        - action: sync+restart
+          path: ./.env
+          target: /app/.env
+        # Sync requirements and rebuild
+        - action: rebuild
+          path: ./requirements.txt
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${MCP_PORT:-8000}/health"]
       interval: 30s
