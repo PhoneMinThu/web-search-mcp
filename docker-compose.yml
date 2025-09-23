@@ -1,0 +1,102 @@
+networks:
+  mcp_net:
+    driver: bridge
+
+volumes:
+  pip_cache:
+    driver: local
+  redis_data:
+    driver: local
+
+services:
+  # =============================================================================
+  # MCP Web Search API Service
+  # =============================================================================
+  mcp-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ${DOCKER_TARGET:-development}
+    container_name: mcp-web-search-api
+    restart: on-failure
+    env_file:
+      - .env
+    environment:
+      - PORT=${MCP_PORT:-8000}
+    ports:
+      - "${HOST_PORT:-8000}:${MCP_PORT:-8000}"
+    networks:
+      - mcp_net
+    profiles:
+      - dev
+      - prod
+    # Development-specific configuration
+    volumes:
+      - .:/app:cached # Live code reload
+      - pip_cache:/root/.cache/pip # Faster rebuilds
+    depends_on: []
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${MCP_PORT:-8000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # =============================================================================
+  # Redis Cache Service (Optional - for future use)
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: mcp-redis
+    restart: on-failure
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - mcp_net
+    profiles:
+      - redis
+      - prod-redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Production-optimized API Service
+  # =============================================================================
+  mcp-api-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: mcp-web-search-api-prod
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PORT=${MCP_PORT:-8000}
+      - PYTHONPATH=/app
+    ports:
+      - "${HOST_PORT:-8000}:${MCP_PORT:-8000}"
+    networks:
+      - mcp_net
+    profiles:
+      - prod
+    # No volume mounts in production for security
+    depends_on: []
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${MCP_PORT:-8000}/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
