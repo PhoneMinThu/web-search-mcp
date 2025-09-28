@@ -31,12 +31,14 @@ The server leverages `fastapi-mcp` which automatically converts your FastAPI end
 ## Installation
 
 1. **Clone and Setup Environment**:
+
 ```bash
 cd /media/phonemt/linux_data/unix_dev/mcp
 source .venv/bin/activate
 ```
 
 2. **Install Dependencies**:
+
 ```bash
 uv pip install -r requirements.txt
 # Or install from pyproject.toml
@@ -44,6 +46,7 @@ uv sync
 ```
 
 3. **Configure Environment**:
+
 ```bash
 cp .env.example .env
 # Edit .env with your Google API credentials
@@ -90,7 +93,7 @@ ENABLE_CORS=true
 
 ```bash
 # Development mode
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8500
 
 # Or using the built-in runner
 python -m app.main
@@ -101,17 +104,20 @@ python -m app.main
 The server automatically exposes the following MCP tools:
 
 #### Search Tools
+
 - `search_web`: Web search with advanced filtering
-- `search_images`: Image search with size, type, and color filters  
+- `search_images`: Image search with size, type, and color filters
 - `search_news`: News search with time-based filtering
 
 #### Cache Management Tools
+
 - `cache_stats`: Get cache statistics
 - `cache_recent`: View recent search queries
 - `cache_popular`: Get most popular search queries
 - `cache_clear`: Clear expired or all cache entries
 
 #### System Tools
+
 - `health_check`: Server health status
 
 ### API Endpoints
@@ -119,7 +125,7 @@ The server automatically exposes the following MCP tools:
 All endpoints are also available as standard REST API:
 
 - `POST /search/web` - Web search
-- `POST /search/images` - Image search  
+- `POST /search/images` - Image search
 - `POST /search/news` - News search
 - `GET /cache/stats` - Cache statistics
 - `GET /cache/recent` - Recent queries
@@ -130,6 +136,7 @@ All endpoints are also available as standard REST API:
 ### Example Search Requests
 
 **Web Search**:
+
 ```json
 {
   \"query\": \"python machine learning\",
@@ -142,6 +149,7 @@ All endpoints are also available as standard REST API:
 ```
 
 **Image Search**:
+
 ```json
 {
   \"query\": \"sunset mountains\",
@@ -153,6 +161,7 @@ All endpoints are also available as standard REST API:
 ```
 
 **News Search**:
+
 ```json
 {
   \"query\": \"artificial intelligence\",
@@ -165,8 +174,9 @@ All endpoints are also available as standard REST API:
 ## MCP Client Usage
 
 Connect any MCP-compatible client to:
-- **HTTP Transport**: `http://localhost:8000/mcp`
-- **WebSocket**: `ws://localhost:8000/mcp` (if enabled)
+
+- **HTTP Transport**: `http://localhost:8500/mcp`
+- **WebSocket**: `ws://localhost:8500/mcp` (if enabled)
 
 The client will automatically discover all available tools and their schemas.
 
@@ -204,6 +214,7 @@ app/
 ### Error Handling
 
 The server includes comprehensive error handling:
+
 - Rate limiting with exponential backoff
 - API quota management
 - Cache invalidation on errors
@@ -220,7 +231,7 @@ WORKDIR /app
 COPY . .
 
 RUN pip install uv && uv sync
-CMD [\"uvicorn\", \"app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8000\"]
+CMD [\"uvicorn\", \"app.main:app\", \"--host\", \"0.0.0.0\", \"--port\", \"8500\"]
 ```
 
 ### Production Considerations
@@ -245,6 +256,7 @@ MIT License - See LICENSE file for details.
 ## Support
 
 For issues and questions:
+
 - Check the [FastAPI MCP documentation](https://github.com/jlowin/fastapi-mcp)
 - Review Google Custom Search API limits
 - Create an issue in this repository

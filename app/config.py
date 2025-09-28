@@ -31,13 +31,13 @@ class Settings(BaseSettings):
         default=10,
         description="Default number of search results to return",
         ge=1,
-        le=100,
+        le=10,
     )
     max_search_results: int = Field(
-        default=100,
-        description="Maximum number of search results allowed",
+        default=10,
+        description="Maximum number of search results allowed (Google Custom Search API limit)",
         ge=1,
-        le=100,
+        le=10,
     )
     cache_ttl_seconds: int = Field(
         default=3600, description="Cache TTL in seconds (1 hour default)", ge=60

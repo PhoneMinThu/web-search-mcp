@@ -7,8 +7,9 @@ Your Docker setup supports multiple approaches to live debugging and file watchi
 ## Current Setup Analysis
 
 ✅ **Already Configured:**
+
 - Multi-stage Dockerfile with development target
-- Uvicorn with `--reload` flag for hot reloading  
+- Uvicorn with `--reload` flag for hot reloading
 - Volume mounts for live code changes
 - `watchfiles` dependency installed
 
@@ -17,6 +18,7 @@ Your Docker setup supports multiple approaches to live debugging and file watchi
 Docker Compose Watch is the modern, official solution for file watching in Docker development environments.
 
 ### Features Added:
+
 - **sync+restart**: Syncs files and restarts the container when Python files change
 - **rebuild**: Rebuilds the image when requirements.txt changes
 - **Automatic ignore**: Ignores cache files and temporary files
@@ -40,7 +42,7 @@ docker compose watch
    - Ignores `__pycache__`, `*.pyc`, `*.pyo`
 
 2. **Environment file** (`.env` → `/app/.env`):
-   - Action: `sync+restart` 
+   - Action: `sync+restart`
    - Restarts when environment changes
 
 3. **Requirements** (`requirements.txt`):
@@ -57,6 +59,7 @@ docker compose --profile dev up
 ```
 
 **How it works:**
+
 - Volume mount: `.:/app:cached`
 - Uvicorn flag: `--reload`
 - Watches: `/app` directory
@@ -67,19 +70,21 @@ docker compose --profile dev up
 For IDE debugging, you can also set up remote debugging:
 
 ### Dockerfile Enhancement for Debugging:
+
 ```dockerfile
 # Add to development stage
 RUN pip install debugpy
 
 # Debug command
-CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8500", "--reload"]
 ```
 
 ### VS Code Launch Configuration:
+
 ```json
 {
   "name": "Python: Remote Attach",
-  "type": "python", 
+  "type": "python",
   "request": "attach",
   "connect": {
     "host": "localhost",
@@ -101,11 +106,11 @@ CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-client",
    - IDE files (`.vscode/`, `.idea/`)
    - OS files (`.DS_Store`, `Thumbs.db`)
 
-2. **Volume Mount Optimization**: 
+2. **Volume Mount Optimization**:
    - Uses `:cached` flag for better performance on macOS/Windows
    - Linux has optimal performance by default
 
-3. **Watch Scope**: 
+3. **Watch Scope**:
    - Docker Compose Watch only watches specified paths
    - Uvicorn reload watches entire `/app` directory
 
@@ -125,6 +130,7 @@ docker compose --profile dev logs -f mcp-api
 ### Test Live Reload:
 
 1. Start the service:
+
    ```bash
    docker compose --profile dev watch
    ```
@@ -139,22 +145,25 @@ docker compose --profile dev logs -f mcp-api
 ### Common Issues & Solutions:
 
 **Issue**: Files not syncing
+
 - **Solution**: Check volume mounts and file permissions
 - **Command**: `docker compose exec mcp-api ls -la /app`
 
 **Issue**: Slow reload on Windows/macOS
+
 - **Solution**: Ensure Docker Desktop uses WSL2 (Windows) or proper file sharing (macOS)
 
 **Issue**: Container keeps restarting
+
 - **Solution**: Check for syntax errors in Python files
 
 ## Performance Comparison
 
-| Method | Reload Speed | Resource Usage | Debug Support |
-|--------|--------------|----------------|---------------|
-| Compose Watch | Fast | Low | Good |
-| Volume + uvicorn | Very Fast | Low | Excellent |
-| Remote Debug | Medium | Medium | Best |
+| Method           | Reload Speed | Resource Usage | Debug Support |
+| ---------------- | ------------ | -------------- | ------------- |
+| Compose Watch    | Fast         | Low            | Good          |
+| Volume + uvicorn | Very Fast    | Low            | Excellent     |
+| Remote Debug     | Medium       | Medium         | Best          |
 
 ## Recommended Workflow
 
@@ -169,8 +178,8 @@ Key variables for development:
 ```bash
 # .env file
 DOCKER_TARGET=development  # Use development stage
-MCP_PORT=8000             # API port
-HOST_PORT=8000            # Host port mapping
+MCP_PORT=8500             # API port
+HOST_PORT=8500            # Host port mapping
 DEBUG=true                # Enable debug mode
 ```
 

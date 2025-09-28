@@ -48,7 +48,7 @@ class BaseSearchRequest(BaseModel):
     num_results: Optional[int] = Field(
         default=10, 
         description="Number of results to return", 
-        ge=1, le=100
+        ge=1, le=10
     )
     start_index: Optional[int] = Field(
         default=1, 

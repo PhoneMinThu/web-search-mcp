@@ -12,3 +12,6 @@ rm:
 
 watch:
 	docker compose --profile dev watch
+
+log:
+	docker compose --profile dev logs -f
