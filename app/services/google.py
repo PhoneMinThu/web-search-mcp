@@ -224,7 +224,10 @@ class GoogleSearchService:
         except httpx.HTTPStatusError as e:
             error_detail = e.response.text if hasattr(e, "response") else str(e)
             # Check if it's a 400 error about invalid num parameter
-            if e.response.status_code == 400 and "invalid argument" in error_detail.lower():
+            if (
+                e.response.status_code == 400
+                and "invalid argument" in error_detail.lower()
+            ):
                 raise Exception(
                     f"Invalid search parameters. Google Custom Search API only supports up to 10 results per request. Error: {error_detail}"
                 )
@@ -408,4 +411,3 @@ class GoogleSearchService:
 
 # Global service instance
 search_service = GoogleSearchService()
-

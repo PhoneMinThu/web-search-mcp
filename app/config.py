@@ -21,7 +21,7 @@ class Settings(BaseSettings):
         default="MCP Web Search Server", description="Application name"
     )
     app_description: str = Field(
-        default="FastAPI MCP server for comprehensive Google web search capabilities",
+        default="FastAPI MCP server for Google Custom Search API with web, image, and news search. IMPORTANT: Maximum 10 results per request due to Google API limits. Use pagination with start_index for more results.",
         description="Application description",
     )
     version: str = Field(default="0.1.0", description="Application version")
@@ -74,4 +74,3 @@ if not settings.google_api_key:
     raise ValueError("GOOGLE_API_KEY environment variable is required")
 if not settings.google_cse_id:
     raise ValueError("GOOGLE_CSE_ID environment variable is required")
-

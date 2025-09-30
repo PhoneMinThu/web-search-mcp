@@ -69,6 +69,17 @@ async def cache_clear(all: bool = False):
     response_model=WebSearchResponse,
     tags=["search"],
     operation_id="search_web",
+    summary="Search the web using Google Custom Search API",
+    description="""Search the web with Google Custom Search API. 
+    
+    IMPORTANT LIMITATIONS:
+    - Maximum 10 results per request (num_results: 1-10)
+    - For more results, use pagination with start_index
+    - Total limit: 100 results maximum via pagination
+    - Example for 20 results: Call twice with start_index=1 then start_index=11
+    
+    Use site parameter to restrict to specific domains (e.g., site='reddit.com')
+    """,
 )
 async def search_web_endpoint(req: WebSearchRequest):
     cached = cache_service.get(req.query, SearchType.WEB, req.model_dump())
@@ -84,6 +95,16 @@ async def search_web_endpoint(req: WebSearchRequest):
     response_model=ImageSearchResponse,
     tags=["search"],
     operation_id="search_images",
+    summary="Search for images using Google Custom Search API",
+    description="""Search for images with Google Custom Search API.
+    
+    IMPORTANT LIMITATIONS:
+    - Maximum 10 results per request (num_results: 1-10)
+    - For more results, use pagination with start_index
+    - Total limit: 100 results maximum via pagination
+    
+    Additional image-specific filters available: image_size, image_type, color
+    """,
 )
 async def search_images_endpoint(req: ImageSearchRequest):
     cached = cache_service.get(req.query, SearchType.IMAGE, req.model_dump())
@@ -99,6 +120,16 @@ async def search_images_endpoint(req: ImageSearchRequest):
     response_model=NewsSearchResponse,
     tags=["search"],
     operation_id="search_news",
+    summary="Search for news articles using Google Custom Search API",
+    description="""Search for news articles with Google Custom Search API.
+    
+    IMPORTANT LIMITATIONS:
+    - Maximum 10 results per request (num_results: 1-10)
+    - For more results, use pagination with start_index
+    - Total limit: 100 results maximum via pagination
+    
+    News results can be sorted by 'date' or 'relevance' and filtered by time period
+    """,
 )
 async def search_news_endpoint(req: NewsSearchRequest):
     cached = cache_service.get(req.query, SearchType.NEWS, req.model_dump())

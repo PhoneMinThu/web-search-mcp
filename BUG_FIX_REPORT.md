@@ -7,11 +7,13 @@ The Web Search MCP service was returning HTTP 500 "Internal Server Error" respon
 ## Root Cause Analysis
 
 ### Problem Identified
+
 - **Primary Issue**: Google Custom Search API has a hard limit of 10 results per request
 - **Code Issue**: The service configuration and schema validation allowed up to 100 results (`le=100`)
 - **Error Handling**: Poor error handling masked the actual 400 "Bad Request" error from Google API
 
 ### Symptoms
+
 - MCP tool calls returning empty responses `{}`
 - Docker logs showing: `ERROR:fastapi_mcp.server:Error calling search_web`
 - Direct HTTP requests > 10 results failing with 500 errors
@@ -19,6 +21,7 @@ The Web Search MCP service was returning HTTP 500 "Internal Server Error" respon
 ### Investigation Results
 
 #### Testing Results:
+
 - ✅ `num_results=10`: Works perfectly
 - ❌ `num_results=11+`: Returns 500 error
 - ✅ Site queries (`site:scholar.google.com`): Work fine
@@ -26,6 +29,7 @@ The Web Search MCP service was returning HTTP 500 "Internal Server Error" respon
 - ✅ Combined queries with ≤10 results: Work fine
 
 #### Direct Google API Testing:
+
 ```bash
 # This works (returns 10 results)
 curl "https://googleapis.com/customsearch/v1?key=XXX&cx=XXX&q=test&num=10"
@@ -38,25 +42,29 @@ curl "https://googleapis.com/customsearch/v1?key=XXX&cx=XXX&q=test&num=15"
 ## Fix Implementation
 
 ### 1. Schema Validation Fix
+
 **File**: `app/schemas/search.py`
+
 ```python
 # BEFORE
 num_results: Optional[int] = Field(
-    default=10, 
-    description="Number of results to return", 
+    default=10,
+    description="Number of results to return",
     ge=1, le=100  # ❌ Wrong limit
 )
 
-# AFTER  
+# AFTER
 num_results: Optional[int] = Field(
-    default=10, 
-    description="Number of results to return", 
+    default=10,
+    description="Number of results to return",
     ge=1, le=10   # ✅ Correct Google API limit
 )
 ```
 
 ### 2. Configuration Update
+
 **File**: `app/config.py`
+
 ```python
 # BEFORE
 max_search_results: int = Field(
@@ -74,7 +82,9 @@ max_search_results: int = Field(
 ```
 
 ### 3. Error Handling Improvement
+
 **File**: `app/services/google.py`
+
 ```python
 # Added specific error handling for 400 errors
 except httpx.HTTPStatusError as e:
@@ -92,6 +102,7 @@ except httpx.HTTPStatusError as e:
 ## Validation of Fix
 
 ### Before Fix:
+
 ```bash
 curl -X POST http://localhost:8500/search/web \
   -H "Content-Type: application/json" \
@@ -100,6 +111,7 @@ curl -X POST http://localhost:8500/search/web \
 ```
 
 ### After Fix:
+
 ```bash
 curl -X POST http://localhost:8500/search/web \
   -H "Content-Type: application/json" \
@@ -116,28 +128,33 @@ curl -X POST http://localhost:8500/search/web \
 ## Impact Assessment
 
 ### Positive Impacts:
+
 - ✅ Eliminates 500 errors for invalid `num_results`
 - ✅ Provides clear validation error messages
 - ✅ Prevents unnecessary API calls to Google
 - ✅ Improves user experience with meaningful errors
 
 ### Breaking Changes:
+
 - ⚠️ `num_results` now limited to 1-10 instead of 1-100
 - ⚠️ Existing clients requesting >10 results will now get 422 instead of 500
 
 ### Backward Compatibility:
+
 - ✅ All valid requests (num_results ≤ 10) continue to work
 - ✅ Default behavior unchanged (still defaults to 10 results)
 
 ## Deployment
 
 The fix was deployed by:
+
 1. Rebuilding the Docker container: `docker compose build mcp-api`
 2. Restarting the service: `docker compose up mcp-api -d`
 
 ## Recommendations
 
 ### For Users:
+
 - Always use `num_results` between 1-10
 - For more results, use pagination with `start_index` parameter
 - Example for getting 20 results:
@@ -145,6 +162,7 @@ The fix was deployed by:
   - Request 2: `{"num_results": 10, "start_index": 11}`
 
 ### For Future Development:
+
 1. **Add Pagination Helper**: Create a utility function to automatically handle pagination
 2. **Documentation Update**: Update API documentation to reflect the 10-result limit
 3. **Testing**: Add integration tests for edge cases and API limits
@@ -158,6 +176,7 @@ The fix was deployed by:
 - **Start index**: 1-91 (for pagination)
 
 ---
+
 **Date**: 2025-09-28  
 **Status**: ✅ RESOLVED  
 **Severity**: High (caused service failures)  
